@@ -1,0 +1,911 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --mono:var(--font-mono,'Courier New',monospace);
+  --sans:var(--font-sans,sans-serif);
+}
+body{font-family:var(--sans);color:var(--color-text-primary);background:transparent;font-size:15px;line-height:1.7}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* Nav */
+nav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:0.5px solid var(--color-border-tertiary);padding:0 0 12px;margin-bottom:24px}
+.nav-btn{padding:5px 13px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap}
+.nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary);font-weight:500}
+
+/* Sections */
+.section{display:none;animation:fadeIn .2s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+h2{font-size:18px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary)}
+h3{font-size:15px;font-weight:500;margin:18px 0 6px;color:var(--color-text-primary)}
+p{color:var(--color-text-secondary);margin-bottom:12px;font-size:14px}
+ul{color:var(--color-text-secondary);font-size:14px;padding-left:18px;margin-bottom:12px}
+li{margin-bottom:4px}
+strong{color:var(--color-text-primary);font-weight:500}
+
+/* Cards */
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.card-sm{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge-blue{background:var(--color-background-info);color:var(--color-text-info)}
+.badge-green{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-amber{background:var(--color-background-warning);color:var(--color-text-warning)}
+.badge-red{background:var(--color-background-danger);color:var(--color-text-danger)}
+.badge-gray{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+
+/* Phase timeline */
+.phase{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.phase-num{min-width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:2px}
+.phase-body{flex:1}
+.phase-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.phase-desc{font-size:13px;color:var(--color-text-secondary);margin-bottom:6px}
+.phase-tags{display:flex;flex-wrap:wrap;gap:4px}
+
+/* Code blocks */
+pre{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.6;overflow-x:auto;margin-bottom:12px;color:var(--color-text-primary)}
+code{font-family:var(--mono);font-size:12px;background:var(--color-background-secondary);padding:1px 5px;border-radius:4px}
+
+/* Data flow arrows */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.flow-box{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:6px 12px;font-size:12px;font-weight:500;white-space:nowrap}
+.flow-arrow{color:var(--color-text-tertiary);font-size:14px}
+
+/* Tech table */
+.tech-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+.tech-table th{text-align:left;padding:8px 10px;border-bottom:0.5px solid var(--color-border-secondary);font-weight:500;font-size:12px;color:var(--color-text-secondary)}
+.tech-table td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);vertical-align:top}
+.tech-table tr:last-child td{border-bottom:none}
+.tech-table td:first-child{color:var(--color-text-primary);font-weight:500}
+
+/* Folder tree */
+.tree{font-family:var(--mono);font-size:13px;color:var(--color-text-secondary);line-height:1.9}
+.tree-dir{color:var(--color-text-primary);font-weight:500}
+.tree-desc{font-family:var(--sans);font-size:12px;color:var(--color-text-tertiary);margin-left:8px}
+
+/* Pitfall box */
+.pitfall{border-left:2px solid var(--color-border-warning);padding:8px 12px;background:var(--color-background-warning);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;margin-bottom:10px}
+.pitfall-label{font-size:11px;font-weight:500;color:var(--color-text-warning);margin-bottom:3px}
+.pitfall p{color:var(--color-text-warning);margin:0;font-size:13px}
+
+/* Algorithm accordion */
+.acc-item{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:8px;overflow:hidden}
+.acc-head{padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:500;color:var(--color-text-primary);background:var(--color-background-primary)}
+.acc-head:hover{background:var(--color-background-secondary)}
+.acc-chevron{font-size:12px;color:var(--color-text-tertiary);transition:transform .2s}
+.acc-body{display:none;padding:12px 14px;background:var(--color-background-secondary);font-size:13px;color:var(--color-text-secondary);border-top:0.5px solid var(--color-border-tertiary)}
+.acc-body.open{display:block}
+.acc-chevron.open{transform:rotate(180deg)}
+
+/* Honest advice */
+.callout{border-radius:var(--border-radius-md);padding:12px 14px;margin-bottom:10px;font-size:13px}
+.callout-danger{background:var(--color-background-danger);border:0.5px solid var(--color-border-danger);color:var(--color-text-danger)}
+.callout-success{background:var(--color-background-success);border:0.5px solid var(--color-border-success);color:var(--color-text-success)}
+.callout-info{background:var(--color-background-info);border:0.5px solid var(--color-border-info);color:var(--color-text-info)}
+.callout-label{font-weight:500;margin-bottom:4px;font-size:12px}
+
+/* Stretch goals */
+.stretch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+.stretch-item{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;font-size:13px}
+.stretch-item .stretch-title{font-weight:500;color:var(--color-text-primary);margin-bottom:4px;font-size:13px}
+.stretch-item p{font-size:12px;margin:0}
+
+/* Section header */
+.section-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.section-label{font-size:11px;font-weight:500;letter-spacing:.04em;color:var(--color-text-tertiary);text-transform:uppercase}
+
+/* Divider */
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:20px 0}
+
+/* Scope table */
+.scope-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.scope-in{border:0.5px solid var(--color-border-success);border-radius:var(--border-radius-md);padding:12px 14px}
+.scope-out{border:0.5px solid var(--color-border-danger);border-radius:var(--border-radius-md);padding:12px 14px}
+.scope-label{font-size:11px;font-weight:500;margin-bottom:8px}
+.scope-in .scope-label{color:var(--color-text-success)}
+.scope-out .scope-label{color:var(--color-text-danger)}
+.scope-list{font-size:13px;color:var(--color-text-secondary);padding-left:14px}
+.scope-list li{margin-bottom:3px}
+
+/* sendPrompt buttons */
+.ask-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer;font-family:var(--sans);transition:all .15s;margin:3px 3px 3px 0}
+.ask-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+
+.toolbar{margin-top:14px;padding-top:12px;border-top:0.5px solid var(--color-border-tertiary);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.toolbar-label{font-size:11px;color:var(--color-text-tertiary);margin-right:4px}
+</style>
+</head>
+<body>
+<h2 class="sr-only">Mini Browser Engine — End-to-End Systems Design Reference</h2>
+
+<nav id="nav">
+  <button class="nav-btn active" onclick="show('problem')">1. Problem</button>
+  <button class="nav-btn" onclick="show('arch')">2. Architecture</button>
+  <button class="nav-btn" onclick="show('roadmap')">3. Roadmap</button>
+  <button class="nav-btn" onclick="show('stack')">4. Tech Stack</button>
+  <button class="nav-btn" onclick="show('structure')">5. Code Structure</button>
+  <button class="nav-btn" onclick="show('algos')">6. Algorithms</button>
+  <button class="nav-btn" onclick="show('code')">7. Code Snippets</button>
+  <button class="nav-btn" onclick="show('stretch')">8. Stretch Goals</button>
+  <button class="nav-btn" onclick="show('learning')">9. Learning</button>
+  <button class="nav-btn" onclick="show('advice')">10. Honest Advice</button>
+</nav>
+
+<!-- 1. PROBLEM -->
+<div id="problem" class="section active">
+  <div class="section-meta">
+    <span class="section-label">Section 1</span>
+    <h2>Problem Statement</h2>
+  </div>
+
+  <p>You're building <strong>Toy Browser</strong> — a simplified, educational rendering engine that takes an HTML string, parses it, applies CSS, computes layout, and paints output to a canvas or terminal. The goal is to understand <em>how Chrome actually works internally</em>, not to replace it.</p>
+
+  <div class="scope-grid">
+    <div class="scope-in">
+      <div class="scope-label">In Scope</div>
+      <ul class="scope-list">
+        <li>Fetch HTML over HTTP (GET only)</li>
+        <li>Parse a subset of HTML tags</li>
+        <li>Build a real DOM tree</li>
+        <li>Parse inline &amp; external CSS</li>
+        <li>CSS cascade, inheritance, specificity</li>
+        <li>Block / inline layout (box model)</li>
+        <li>Painting to a 2D canvas or pixel buffer</li>
+        <li>Basic JS: <code>document.getElementById</code>, <code>.style</code>, <code>.textContent</code></li>
+        <li>onClick events (mouse click only)</li>
+      </ul>
+    </div>
+    <div class="scope-out">
+      <div class="scope-label">Out of Scope</div>
+      <ul class="scope-list">
+        <li>Full JS engine (no V8)</li>
+        <li>HTTPS / TLS</li>
+        <li>Flexbox / Grid layout</li>
+        <li>Tables</li>
+        <li>Shadow DOM, Web Components</li>
+        <li>SVG rendering</li>
+        <li>Images (beyond placeholder boxes)</li>
+        <li>Fonts (use system monospace)</li>
+        <li>Tabs / multi-process model</li>
+        <li>Security sandboxing</li>
+        <li>Accessibility tree</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Core constraints</h3>
+  <div class="card-grid">
+    <div class="card-sm"><strong>Single-threaded</strong><p style="margin:4px 0 0;font-size:13px">No worker threads or parallel parsers. One event loop.</p></div>
+    <div class="card-sm"><strong>No full JS engine</strong><p style="margin:4px 0 0;font-size:13px">Interpret only a tiny subset via tree-walk or basic eval.</p></div>
+    <div class="card-sm"><strong>ASCII or SDL output</strong><p style="margin:4px 0 0;font-size:13px">Terminal ASCII art or SDL/Pygame pixel canvas. No WebGL.</p></div>
+    <div class="card-sm"><strong>Subset HTML only</strong><p style="margin:4px 0 0;font-size:13px">Support: html, head, body, div, p, span, h1-h3, a, ul, li, style, script.</p></div>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('What HTML tags should I support first in a mini browser engine?')">Which tags first? ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('What is the difference between a browser engine and a JavaScript engine?')">Engine vs JS engine ↗</button>
+  </div>
+</div>
+
+<!-- 2. ARCHITECTURE -->
+<div id="arch" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 2</span>
+    <h2>High-Level Architecture</h2>
+  </div>
+
+  <p>Eight components in a linear pipeline. Data flows in one direction — each stage transforms input into a richer representation.</p>
+
+  <div class="flow">
+    <div class="flow-box">Network</div><div class="flow-arrow">→</div>
+    <div class="flow-box">HTML Parser</div><div class="flow-arrow">→</div>
+    <div class="flow-box">DOM Tree</div><div class="flow-arrow">→</div>
+    <div class="flow-box">CSS Parser</div><div class="flow-arrow">→</div>
+    <div class="flow-box">Style Engine</div><div class="flow-arrow">→</div>
+    <div class="flow-box">Layout Engine</div><div class="flow-arrow">→</div>
+    <div class="flow-box">Render Tree</div><div class="flow-arrow">→</div>
+    <div class="flow-box">Painter</div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">1. Networking layer</span>
+      <span class="badge badge-gray">input</span>
+    </div>
+    <p style="margin:0;font-size:13px">Opens a TCP socket, sends an HTTP/1.0 GET request, reads the response body as raw bytes. Returns an HTML string. No redirects, no cookies, no caching yet.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">2. HTML Parser → DOM Tree</span>
+      <span class="badge badge-blue">transform</span>
+    </div>
+    <p style="margin:0;font-size:13px">Tokenizer reads characters and emits tokens: <code>StartTag</code>, <code>EndTag</code>, <code>Text</code>, <code>Comment</code>. A tree builder consumes tokens and builds a tree of <code>Node</code> objects (Element, Text, Document). Error recovery is required — real HTML is malformed.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">3. CSS Parser → Style Rules</span>
+      <span class="badge badge-blue">transform</span>
+    </div>
+    <p style="margin:0;font-size:13px">Reads CSS text, tokenizes property-value pairs, parses selectors. Produces a list of <code>Rule{selector, declarations}</code> objects. Handles inline styles, <code>&lt;style&gt;</code> blocks, and linked stylesheets.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">4. Style Resolution (Cascade)</span>
+      <span class="badge badge-blue">transform</span>
+    </div>
+    <p style="margin:0;font-size:13px">Walks the DOM. For each element, collects all matching CSS rules, sorts by specificity, applies inheritance, resolves <code>em</code>/<code>%</code> values. Produces a <strong>Computed Style Map</strong> per node.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">5. Layout Engine</span>
+      <span class="badge badge-amber">compute</span>
+    </div>
+    <p style="margin:0;font-size:13px">Takes the styled DOM and computes a <strong>box tree</strong>. Each box gets x, y, width, height based on the box model: content + padding + border + margin. Implements block formatting context (vertical stacking) and inline formatting context (horizontal flow with line breaking).</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">6. Render Tree Construction</span>
+      <span class="badge badge-blue">transform</span>
+    </div>
+    <p style="margin:0;font-size:13px">Strips invisible nodes (<code>display:none</code>, <code>head</code>). Maps DOM nodes to render boxes. At this stage you have a clean tree ready to paint — no layout logic, just paint-ready boxes with visual properties.</p>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;font-weight:500">7. Painter (Rasterizer)</span>
+      <span class="badge badge-green">output</span>
+    </div>
+    <p style="margin:0;font-size:13px">Walks the render tree in <strong>painter's order</strong> (backgrounds → borders → text). Fills a pixel buffer. For ASCII output: maps boxes to terminal rows/cols. For SDL: fills rectangles and blits character bitmaps. JS execution can mutate the DOM and trigger a re-paint.</p>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('Explain in detail how a browser render tree differs from the DOM tree')">Render tree vs DOM ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('How does CSS cascade and specificity work step by step?')">CSS cascade deep dive ↗</button>
+  </div>
+</div>
+
+<!-- 3. ROADMAP -->
+<div id="roadmap" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 3</span>
+    <h2>Step-by-Step Roadmap</h2>
+  </div>
+  <p>Six phases, each producing a visible, runnable output. Never move to the next phase until the current one renders correctly.</p>
+
+  <div class="phase">
+    <div class="phase-num badge badge-gray" style="font-size:11px">P1</div>
+    <div class="phase-body">
+      <div class="phase-title">Phase 1 — Render plain text HTML</div>
+      <div class="phase-desc"><strong>Implement:</strong> TCP socket fetch → regex/manual tokenizer → flat node list → print text content to stdout.<br><strong>Output:</strong> Running <code>./browser http://example.com</code> dumps all visible text to terminal.<br><strong>Skip:</strong> No DOM tree yet. Just extract text between tags.</div>
+      <div class="phase-tags">
+        <span class="badge badge-gray">Networking</span>
+        <span class="badge badge-gray">Tokenizer</span>
+        <span class="badge badge-gray">Text extraction</span>
+      </div>
+      <div class="pitfall" style="margin-top:8px">
+        <div class="pitfall-label">Common pitfall</div>
+        <p>Trying to parse HTML with regex. It works for 80% of pages, then silently breaks. Build a real character-by-character tokenizer from day one.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num badge badge-blue" style="font-size:11px">P2</div>
+    <div class="phase-body">
+      <div class="phase-title">Phase 2 — DOM tree with basic tags</div>
+      <div class="phase-desc"><strong>Implement:</strong> Full tokenizer → tree builder → <code>Node</code> class with children/parent → serialize DOM to indented text.<br><strong>Output:</strong> A printed DOM tree like a browser's DevTools inspector.<br><strong>Support:</strong> div, p, span, h1-h3, a, ul, li, head, body.</div>
+      <div class="phase-tags">
+        <span class="badge badge-blue">DOM Tree</span>
+        <span class="badge badge-blue">Tree builder</span>
+        <span class="badge badge-blue">Error recovery</span>
+      </div>
+      <div class="pitfall" style="margin-top:8px">
+        <div class="pitfall-label">Common pitfall</div>
+        <p>Forgetting self-closing tags (br, img, input, meta). Also: not handling malformed HTML (unclosed tags). Chrome has a full error-recovery algorithm. You need a simplified version.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num badge badge-amber" style="font-size:11px">P3</div>
+    <div class="phase-body">
+      <div class="phase-title">Phase 3 — CSS parsing + style resolution</div>
+      <div class="phase-desc"><strong>Implement:</strong> CSS tokenizer → rule list → selector matching (tag, class, id) → specificity calculator → cascade → computed style per node.<br><strong>Output:</strong> Each DOM node prints its resolved style: <code>div → {color: red, font-size: 16px}</code>.<br><strong>Start with:</strong> Only inline styles, then add <code>&lt;style&gt;</code> block support.</div>
+      <div class="phase-tags">
+        <span class="badge badge-amber">CSS Parser</span>
+        <span class="badge badge-amber">Specificity</span>
+        <span class="badge badge-amber">Cascade</span>
+        <span class="badge badge-amber">Inheritance</span>
+      </div>
+      <div class="pitfall" style="margin-top:8px">
+        <div class="pitfall-label">Common pitfall</div>
+        <p>Forgetting inheritance. Properties like <code>color</code> and <code>font-size</code> inherit from parent if not set. <code>background-color</code> does NOT inherit. Know the list.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num badge badge-amber" style="font-size:11px">P4</div>
+    <div class="phase-body">
+      <div class="phase-title">Phase 4 — Layout engine (box model)</div>
+      <div class="phase-desc"><strong>Implement:</strong> Block layout (vertical stacking), inline layout (text flow + word wrap), margin collapsing (simplified), percentage/auto widths.<br><strong>Output:</strong> ASCII canvas showing boxes at correct positions. Each box labeled with its tag.<br><strong>Algorithm:</strong> Top-down pass to assign widths, bottom-up pass to assign heights.</div>
+      <div class="phase-tags">
+        <span class="badge badge-amber">Box model</span>
+        <span class="badge badge-amber">Block layout</span>
+        <span class="badge badge-amber">Inline flow</span>
+        <span class="badge badge-amber">Word wrap</span>
+      </div>
+      <div class="pitfall" style="margin-top:8px">
+        <div class="pitfall-label">Common pitfall</div>
+        <p>Margin collapsing is notoriously complex. Two adjacent block margins collapse into the larger one. Most learners get this wrong. Implement a simple version (no negative margins, no float interactions).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num badge badge-green" style="font-size:11px">P5</div>
+    <div class="phase-body">
+      <div class="phase-title">Phase 5 — Painting to a visible surface</div>
+      <div class="phase-desc"><strong>Implement:</strong> Render tree construction → painter's order traversal → fill pixel buffer (SDL/Pygame) or ASCII grid.<br><strong>Output:</strong> A real window showing your test HTML page with colored boxes and text.<br><strong>Order:</strong> backgrounds → borders → text. No stacking contexts yet.</div>
+      <div class="phase-tags">
+        <span class="badge badge-green">SDL/Pygame</span>
+        <span class="badge badge-green">Painter's order</span>
+        <span class="badge badge-green">Pixel buffer</span>
+      </div>
+      <div class="pitfall" style="margin-top:8px">
+        <div class="pitfall-label">Common pitfall</div>
+        <p>Not following painter's order correctly causes backgrounds to draw over text. Always: backgrounds → outlines → borders → text. Never text first.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num badge badge-red" style="font-size:11px">P6</div>
+    <div class="phase-body">
+      <div class="phase-title">Phase 6 — Basic JS + interactivity</div>
+      <div class="phase-desc"><strong>Implement:</strong> A tiny JS interpreter (tree-walk evaluator) that supports: variable declarations, function calls, <code>document.getElementById()</code>, <code>.textContent =</code>, <code>.style.color =</code>, <code>addEventListener('click', fn)</code>.<br><strong>Output:</strong> Clicking a button changes text color. That's the goal for Phase 6.</div>
+      <div class="phase-tags">
+        <span class="badge badge-red">JS interpreter</span>
+        <span class="badge badge-red">DOM API</span>
+        <span class="badge badge-red">Events</span>
+        <span class="badge badge-red">Re-paint loop</span>
+      </div>
+      <div class="pitfall" style="margin-top:8px">
+        <div class="pitfall-label">Common pitfall</div>
+        <p>Building a full JS interpreter from scratch is a multi-month project. Use an existing minimal interpreter (e.g. Duktape in C, or Python's ast module) and <em>only</em> implement the DOM-binding layer yourself.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('How do I implement HTML error recovery in a browser parser?')">HTML error recovery ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('Explain block formatting context and inline formatting context in CSS layout')">Block vs inline layout ↗</button>
+  </div>
+</div>
+
+<!-- 4. TECH STACK -->
+<div id="stack" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 4</span>
+    <h2>Tech Stack Recommendations</h2>
+  </div>
+
+  <h3>Option A — Beginner-friendly (Python)</h3>
+  <p>Recommended if you want to <strong>understand concepts first</strong> and paint output to screen quickly.</p>
+  <table class="tech-table">
+    <tr><th>Component</th><th>Tool</th><th>Why</th></tr>
+    <tr><td>Networking</td><td><code>socket</code> stdlib</td><td>Raw TCP, no magic. Forces you to understand HTTP.</td></tr>
+    <tr><td>HTML/CSS Parser</td><td>Python from scratch</td><td>Easy to debug, fast iteration, readable code.</td></tr>
+    <tr><td>GUI / Painting</td><td>Pygame or tkinter</td><td>Pygame gives pixel-level control. Tkinter is zero-install.</td></tr>
+    <tr><td>JS execution</td><td>Duktape via ctypes or skip</td><td>Py-duktape binds a real JS engine. Or just skip JS.</td></tr>
+    <tr><td>Testing</td><td>pytest</td><td>Unit test your parser and layout engine independently.</td></tr>
+  </table>
+
+  <h3>Option B — Performance-focused (Rust)</h3>
+  <p>Recommended if you want to go <strong>deep into systems</strong> and build something closer to a real engine.</p>
+  <table class="tech-table">
+    <tr><th>Component</th><th>Tool</th><th>Why</th></tr>
+    <tr><td>Networking</td><td><code>std::net::TcpStream</code></td><td>Zero-cost abstractions, safe memory handling.</td></tr>
+    <tr><td>HTML/CSS Parser</td><td>Rust from scratch</td><td>Teaches ownership model deeply. Very satisfying.</td></tr>
+    <tr><td>GUI / Painting</td><td><code>pixels</code> crate + winit</td><td>Write to a pixel framebuffer directly. Production-quality.</td></tr>
+    <tr><td>JS execution</td><td>Boa (Rust JS engine)</td><td>Pure Rust JS engine — integrate via crate.</td></tr>
+    <tr><td>Testing</td><td>Rust test harness</td><td>Built-in, fast, zero setup.</td></tr>
+  </table>
+
+  <h3>Why not C++?</h3>
+  <p>C++ is what Chromium uses, but for a learning project it adds memory bugs and build complexity that distract from understanding the browser concepts. Use Rust if you want C++ performance — same speed, far fewer footguns.</p>
+
+  <div class="pitfall">
+    <div class="pitfall-label">Avoid this trap</div>
+    <p>Don't pick Rust if you haven't used it before. The borrow checker will eat 60% of your time. Start with Python, get the engine working, then port to Rust once you understand every component.</p>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('How do I set up a Pygame window for browser rendering?')">Pygame setup ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('What Rust crates are best for building a browser engine?')">Rust crates ↗</button>
+  </div>
+</div>
+
+<!-- 5. CODE STRUCTURE -->
+<div id="structure" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 5</span>
+    <h2>Code Structure</h2>
+  </div>
+  <p>Each folder maps to one pipeline stage. Never let two stages share mutable state — pass data through return values only.</p>
+
+  <div class="card">
+<div class="tree">
+<span class="tree-dir">toy_browser/</span>
+├── <span class="tree-dir">net/</span><span class="tree-desc">— HTTP fetch, socket management</span>
+│   ├── http.py <span class="tree-desc">— TCP socket, request/response parsing</span>
+│   └── cache.py <span class="tree-desc">— Simple in-memory URL cache (Phase 4+)</span>
+├── <span class="tree-dir">parser/</span><span class="tree-desc">— HTML and CSS tokenizing + tree building</span>
+│   ├── html_tokenizer.py <span class="tree-desc">— char-by-char state machine, emits tokens</span>
+│   ├── html_tree_builder.py <span class="tree-desc">— tokens → DOM Node tree</span>
+│   ├── css_tokenizer.py <span class="tree-desc">— tokenizes CSS text into chunks</span>
+│   └── css_parser.py <span class="tree-desc">— chunks → Rule objects with selectors</span>
+├── <span class="tree-dir">dom/</span><span class="tree-desc">— Data structures for the document model</span>
+│   ├── node.py <span class="tree-desc">— Node, ElementNode, TextNode, DocumentNode</span>
+│   └── selector.py <span class="tree-desc">— Selector matching + specificity calc</span>
+├── <span class="tree-dir">style/</span><span class="tree-desc">— CSS cascade and computed value resolution</span>
+│   ├── cascade.py <span class="tree-desc">— applies rules to DOM, resolves specificity</span>
+│   └── computed.py <span class="tree-desc">— resolves em/%, inherits properties</span>
+├── <span class="tree-dir">layout/</span><span class="tree-desc">— Box model and flow layout</span>
+│   ├── box.py <span class="tree-desc">— BoxModel dataclass (x,y,width,height,padding,margin)</span>
+│   ├── block.py <span class="tree-desc">— Block formatting context algorithm</span>
+│   └── inline.py <span class="tree-desc">— Inline formatting context, line boxes, word wrap</span>
+├── <span class="tree-dir">renderer/</span><span class="tree-desc">— Render tree + painting</span>
+│   ├── render_tree.py <span class="tree-desc">— strips invisible nodes, builds paint-ready tree</span>
+│   ├── painter.py <span class="tree-desc">— walks tree in painter's order, fills surface</span>
+│   └── canvas.py <span class="tree-desc">— pixel buffer abstraction (Pygame or ASCII)</span>
+├── <span class="tree-dir">js_engine/</span><span class="tree-desc">— Minimal JS binding layer</span>
+│   ├── interpreter.py <span class="tree-desc">— tiny expression evaluator (or Duktape binding)</span>
+│   ├── dom_api.py <span class="tree-desc">— getElementById, style, textContent bindings</span>
+│   └── event_loop.py <span class="tree-desc">— click event queue + dispatch</span>
+├── <span class="tree-dir">tests/</span>
+│   ├── test_parser.py
+│   ├── test_layout.py
+│   └── html_fixtures/ <span class="tree-desc">— test HTML files</span>
+└── main.py <span class="tree-desc">— CLI entry point, wires all stages together</span>
+</div>
+  </div>
+
+  <h3>Key design rules</h3>
+  <ul>
+    <li>Each module has a single <code>parse()</code> or <code>compute()</code> function. No global state.</li>
+    <li>DOM nodes are <strong>immutable after construction</strong>. Layout produces new BoxModel objects, it doesn't mutate nodes.</li>
+    <li>The JS engine mutates the DOM through a clean API — <code>dom_api.py</code> is the only bridge.</li>
+    <li>Tests run on each module independently — you can test layout without a running network.</li>
+  </ul>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('Show me a Python Node class for a browser DOM implementation')">Node class example ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('How should I structure tests for a browser layout engine?')">Testing strategy ↗</button>
+  </div>
+</div>
+
+<!-- 6. ALGORITHMS -->
+<div id="algos" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 6</span>
+    <h2>Key Algorithms &amp; Concepts</h2>
+  </div>
+  <p>Click each concept to expand the explanation.</p>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggle(this)">
+      HTML parsing — tokenization + tree building
+      <span class="acc-chevron">▾</span>
+    </div>
+    <div class="acc-body">
+      <p><strong>Step 1 — Tokenizer (state machine).</strong> You read HTML character by character and maintain a state: <code>DATA</code>, <code>TAG_OPEN</code>, <code>TAG_NAME</code>, <code>ATTR_NAME</code>, <code>ATTR_VALUE</code>, etc. Each state transition emits a token or changes state.</p>
+      <p><strong>Step 2 — Tree builder.</strong> Maintains an open-element stack. When you see <code>&lt;div&gt;</code>, push it. When you see <code>&lt;/div&gt;</code>, pop everything until you find a matching div and close it. Text tokens become TextNode children of the current open element.</p>
+      <p><strong>Error recovery.</strong> If you see <code>&lt;p&gt;&lt;div&gt;</code>, the <code>&lt;div&gt;</code> implicitly closes the <code>&lt;p&gt;</code> because div cannot be inside p in block layout. Your tree builder must know these rules.</p>
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggle(this)">
+      CSS cascade &amp; specificity
+      <span class="acc-chevron">▾</span>
+    </div>
+    <div class="acc-body">
+      <p><strong>Specificity</strong> is a score: <code>(inline, id, class, tag)</code> — higher wins. <code>id</code> beats <code>class</code> beats <code>tag</code>. Example: <code>#nav .item a</code> = (0, 1, 1, 1).</p>
+      <p><strong>Cascade algorithm:</strong> 1) Collect all rules matching an element. 2) Sort by origin (author &gt; user agent). 3) Sort by specificity. 4) Last declaration wins if equal. 5) Apply to the element.</p>
+      <p><strong>Inheritance:</strong> If a property is not set and it's inheritable (color, font-size, font-family, line-height), copy from parent's computed value. Non-inheritable properties (background-color, border, margin, padding) default to their initial value.</p>
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggle(this)">
+      Box model &amp; layout calculations
+      <span class="acc-chevron">▾</span>
+    </div>
+    <div class="acc-body">
+      <p><strong>Every element is a box.</strong> Total width = margin-left + border-left + padding-left + content-width + padding-right + border-right + margin-right.</p>
+      <p><strong>Block layout (vertical flow):</strong> Each block child is placed below the previous one. Width = parent's content width (minus margins). Height = sum of children's heights + own padding.</p>
+      <p><strong>Inline layout (horizontal flow):</strong> Inline elements are placed left-to-right. When a line is full, start a new line. Line height = max(font-size) of elements on that line.</p>
+      <p><strong>Two-pass layout:</strong> First pass (top-down) assigns widths (widths depend on parent). Second pass (bottom-up) assigns heights (heights depend on children).</p>
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggle(this)">
+      Painting order (painter's algorithm)
+      <span class="acc-chevron">▾</span>
+    </div>
+    <div class="acc-body">
+      <p>CSS defines a specific paint order to ensure correct visual layering. Your painter must follow this order exactly for every render box:</p>
+      <p>1) Background color → 2) Background image → 3) Border → 4) Children (in source order) → 5) Outline</p>
+      <p>This is applied recursively for every element. A child's background paints on top of the parent's background — which is why children appear in front.</p>
+      <p><strong>Stacking contexts</strong> (skip for Phase 5): <code>z-index</code> and <code>position: absolute/fixed</code> create new stacking contexts. This is where real browsers get very complex. Ignore for now.</p>
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggle(this)">
+      Selector matching
+      <span class="acc-chevron">▾</span>
+    </div>
+    <div class="acc-body">
+      <p><strong>For each DOM element</strong>, you check every CSS rule to see if its selector matches. A selector match is true if the selector's conditions all hold:</p>
+      <ul style="margin:8px 0 8px 16px">
+        <li>Tag selector: element.tagName == selector.tag</li>
+        <li>Class selector: element.classList contains selector.className</li>
+        <li>ID selector: element.id == selector.id</li>
+        <li>Descendant: element has an ancestor matching left side of selector</li>
+      </ul>
+      <p><strong>Real browsers</strong> do this right-to-left (key selector first, then ancestors) for performance. For your toy engine, left-to-right is fine.</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('Show me a simple HTML tokenizer state machine in Python')">Tokenizer state machine ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('How does margin collapsing work in CSS block layout?')">Margin collapsing ↗</button>
+  </div>
+</div>
+
+<!-- 7. CODE SNIPPETS -->
+<div id="code" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 7</span>
+    <h2>Minimal Working Examples</h2>
+  </div>
+
+  <h3>1 — DOM Node class</h3>
+<pre>
+from dataclasses import dataclass, field
+from typing import Optional, List, Dict
+
+@dataclass
+class Node:
+    node_type: str  # 'element' | 'text' | 'document'
+    tag_name: str = ''
+    attributes: Dict[str, str] = field(default_factory=dict)
+    text: str = ''
+    children: List['Node'] = field(default_factory=list)
+    parent: Optional['Node'] = None
+
+    def append_child(self, child: 'Node'):
+        child.parent = self
+        self.children.append(child)
+
+    def get_attr(self, name: str) -> str:
+        return self.attributes.get(name, '')
+
+    # Simple pretty-print for debugging
+    def dump(self, indent=0):
+        prefix = '  ' * indent
+        if self.node_type == 'text':
+            print(f"{prefix}[text: {self.text.strip()!r}]")
+        else:
+            print(f"{prefix}&lt;{self.tag_name} {self.attributes}&gt;")
+            for child in self.children:
+                child.dump(indent + 1)
+</pre>
+
+  <h3>2 — Simplified CSS cascade</h3>
+<pre>
+def specificity(selector: str) -> tuple:
+    """Returns (id_count, class_count, tag_count)"""
+    ids     = selector.count('#')
+    classes = selector.count('.')
+    tags    = len([p for p in selector.split()
+                   if p[0] not in '.#['])
+    return (ids, classes, tags)
+
+def matches(node: Node, selector: str) -> bool:
+    s = selector.strip()
+    if s.startswith('#'):
+        return node.get_attr('id') == s[1:]
+    if s.startswith('.'):
+        return s[1:] in node.get_attr('class').split()
+    return node.tag_name == s
+
+def compute_styles(node: Node, rules: list,
+                   parent_styles: dict) -> dict:
+    # Inheritable properties copy from parent
+    INHERITED = {'color', 'font-size', 'font-family',
+                 'line-height', 'text-align'}
+    styles = {k: v for k, v in parent_styles.items()
+              if k in INHERITED}
+
+    # Collect + sort matching rules by specificity
+    matching = [(specificity(r.selector), r.declarations)
+                for r in rules if matches(node, r.selector)]
+    matching.sort(key=lambda x: x[0])
+
+    for _, decls in matching:
+        styles.update(decls)
+
+    # Inline styles override everything
+    if inline := node.get_attr('style'):
+        for decl in inline.split(';'):
+            if ':' in decl:
+                k, v = decl.split(':', 1)
+                styles[k.strip()] = v.strip()
+
+    return styles
+</pre>
+
+  <h3>3 — Block layout (simplified)</h3>
+<pre>
+@dataclass
+class Rect:
+    x: float; y: float
+    width: float; height: float
+
+def layout_block(node: Node, styles: dict,
+                 container: Rect) -> Rect:
+    ml = float(styles.get('margin-left', 0))
+    mr = float(styles.get('margin-right', 0))
+    pl = float(styles.get('padding-left', 0))
+    pr = float(styles.get('padding-right', 0))
+    pt = float(styles.get('padding-top', 0))
+    pb = float(styles.get('padding-bottom', 0))
+
+    # Width: fill container minus margins
+    content_w = container.width - ml - mr - pl - pr
+    content_x = container.x + ml + pl
+    content_y = container.y + pt
+
+    # Layout children vertically
+    cursor_y = content_y
+    for child in node.children:
+        child_box = layout_block(child, child_styles,
+            Rect(content_x, cursor_y, content_w, 0))
+        cursor_y += child_box.height
+
+    height = cursor_y - content_y + pb
+    return Rect(container.x + ml, container.y,
+                content_w + pl + pr, height + pt + pb)
+</pre>
+
+  <h3>4 — ASCII painter (for terminal rendering)</h3>
+<pre>
+CANVAS_W, CANVAS_H = 80, 40
+canvas = [[' '] * CANVAS_W for _ in range(CANVAS_H)]
+
+def fill_rect(x, y, w, h, char='█'):
+    for row in range(int(y), min(int(y+h), CANVAS_H)):
+        for col in range(int(x), min(int(x+w), CANVAS_W)):
+            canvas[row][col] = char
+
+def draw_text(x, y, text):
+    row = int(y)
+    if 0 &lt;= row &lt; CANVAS_H:
+        for i, ch in enumerate(text):
+            col = int(x) + i
+            if 0 &lt;= col &lt; CANVAS_W:
+                canvas[row][col] = ch
+
+def paint(render_box):
+    b = render_box
+    fill_rect(b.x, b.y, b.width, b.height, '░')
+    if b.text:
+        draw_text(b.x + 1, b.y, b.text)
+    for child in b.children:
+        paint(child)
+
+def print_canvas():
+    for row in canvas:
+        print(''.join(row))
+</pre>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('Write a complete HTML tokenizer state machine in Python with all states')">Full tokenizer ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('How do I render text to a Pygame window with a pixel font?')">Pygame text rendering ↗</button>
+  </div>
+</div>
+
+<!-- 8. STRETCH GOALS -->
+<div id="stretch" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 8</span>
+    <h2>Stretch Goals</h2>
+  </div>
+  <p>These are real features to add once your Phase 1-6 engine is solid. Each one is a deep rabbit hole on its own.</p>
+
+  <div class="stretch-grid">
+    <div class="stretch-item">
+      <div class="stretch-title">Flexbox layout</div>
+      <p>Implement the flexbox algorithm: main axis distribution, cross axis alignment, flex-grow/shrink. A 2-3 week project on its own. Read the CSS Flexbox spec — it's unusually readable.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">Incremental layout</div>
+      <p>Instead of full re-layout on every JS change, only re-layout the subtree that was mutated. Requires tracking "dirty" flags on nodes. This is what real browsers do for performance.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">Event loop</div>
+      <p>A real browser event loop: task queue + microtask queue + animation frame callbacks. Implement setTimeout, requestAnimationFrame, and Promise resolution order correctly.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">HTTP cache</div>
+      <p>Implement Cache-Control, ETag, and If-None-Match. This teaches how browsers avoid re-downloading unchanged resources and is a complete mini-project in itself.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">CSS custom properties</div>
+      <p>Implement CSS variables (<code>--my-color: red</code> + <code>var(--my-color)</code>). Teaches how cascade works at a deeper level. Surprisingly straightforward to add once your style engine is clean.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">Stacking contexts</div>
+      <p>Implement z-index and positioned elements. Requires painting in stacking context order instead of source order. Makes transforms and opacity work correctly.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">Image loading</div>
+      <p>Decode JPEG/PNG from file or HTTP, scale to fit the img element's box, and blit to canvas. Introduces async resource loading.</p>
+    </div>
+    <div class="stretch-item">
+      <div class="stretch-title">Accessibility tree</div>
+      <p>Build a parallel tree of accessible nodes (ARIA roles, labels, descriptions). Teaches you how screen readers interact with browsers at the OS level.</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('How does the CSS Flexbox layout algorithm work step by step?')">Flexbox algorithm ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('How does a browser event loop work with microtasks and macrotasks?')">Event loop deep dive ↗</button>
+  </div>
+</div>
+
+<!-- 9. LEARNING -->
+<div id="learning" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 9</span>
+    <h2>Learning Strategy</h2>
+  </div>
+
+  <h3>What to learn before starting</h3>
+  <div class="card-grid">
+    <div class="card-sm"><strong>Data structures</strong><p style="margin:4px 0 0;font-size:13px">Trees, stacks, queues. You'll use all three in the first week. Not optional.</p></div>
+    <div class="card-sm"><strong>State machines</strong><p style="margin:4px 0 0;font-size:13px">The HTML tokenizer is a 72-state machine. Understand how to model state as an enum.</p></div>
+    <div class="card-sm"><strong>TCP/HTTP basics</strong><p style="margin:4px 0 0;font-size:13px">What is an HTTP request/response? Read RFC 7230, sections 1-3. Takes 2 hours.</p></div>
+    <div class="card-sm"><strong>Box model</strong><p style="margin:4px 0 0;font-size:13px">Open DevTools right now. Inspect the box model tab for 3 elements. Know this cold.</p></div>
+    <div class="card-sm"><strong>CSS specificity</strong><p style="margin:4px 0 0;font-size:13px">Play the CSS Diner game to completion. Then read the MDN specificity page.</p></div>
+    <div class="card-sm"><strong>Recursion</strong><p style="margin:4px 0 0;font-size:13px">Every DOM traversal is recursive. If recursion is shaky, fix it now. 2-3 practice problems.</p></div>
+  </div>
+
+  <h3>What to deliberately ignore</h3>
+  <ul>
+    <li><strong>The full HTML5 spec</strong> — 1,200 pages. You need maybe 80 pages of it. Focus on section 8 (parsing) and section 12 (tree construction).</li>
+    <li><strong>CSS Grid</strong> — More complex than Flexbox. Skip until you have Flexbox working.</li>
+    <li><strong>Security</strong> — CORS, CSP, sandboxing. Real browsers need this. Yours doesn't.</li>
+    <li><strong>Multi-process architecture</strong> — Chrome uses separate processes for each tab. Out of scope.</li>
+    <li><strong>Font rendering</strong> — Kerning, hinting, ligatures, bidirectional text. Use a monospace bitmap font and ignore the rest.</li>
+  </ul>
+
+  <h3>How to debug this system</h3>
+  <p>Each stage has a natural inspection point. Build a <code>--debug</code> flag that prints each stage's output before proceeding:</p>
+  <ul>
+    <li><strong>Tokenizer:</strong> Print every token as it's emitted. Compare against your expected token list manually.</li>
+    <li><strong>DOM tree:</strong> Print the tree as indented HTML. Compare against Chrome's DevTools Elements panel.</li>
+    <li><strong>Computed styles:</strong> Print each node's full style map. Compare against Chrome's Computed Styles tab.</li>
+    <li><strong>Layout:</strong> Print each box's (x, y, width, height). Compare against Chrome's box model inspector.</li>
+    <li><strong>Painter:</strong> If something doesn't show up, add a red debug border around every box to see what's there.</li>
+  </ul>
+
+  <div class="callout callout-info">
+    <div class="callout-label">Best reference</div>
+    Matt Brubeck's "Let's build a browser engine!" blog series (in Rust). It covers Phases 1-4 step by step. Even if you use Python, the logic maps exactly. Read it alongside building.
+  </div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Ask deeper:</span>
+    <button class="ask-btn" onclick="sendPrompt('What are the most important chapters of the HTML5 spec to read for building a browser?')">Which spec chapters? ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('How do I unit test an HTML parser without a full browser?')">Testing parsers ↗</button>
+  </div>
+</div>
+
+<!-- 10. HONEST ADVICE -->
+<div id="advice" class="section">
+  <div class="section-meta">
+    <span class="section-label">Section 10</span>
+    <h2>Honest Advice</h2>
+  </div>
+
+  <h3>Why browser engines are genuinely hard</h3>
+  <p>Chrome is one of the largest software projects in history — 35+ million lines of code, maintained by hundreds of engineers. The difficulty isn't in any single algorithm being complex. It's that there are <em>thousands</em> of edge cases that interact with each other. Every CSS property can interact with every other CSS property. HTML error recovery is a spec of its own. The JS engine interacts with layout which interacts with painting which interacts with events.</p>
+  <p>Your toy engine will handle 20% of cases correctly. That 20% will teach you 80% of what there is to know. That's the right trade-off.</p>
+
+  <div class="callout callout-danger">
+    <div class="callout-label">Where most beginners fail</div>
+    They try to support everything before anything works. They build a "complete" CSS parser before their HTML parser works. They add JavaScript before layout is correct. Ship each phase. A working Phase 1 is worth more than a broken Phase 4.
+  </div>
+
+  <div class="callout callout-danger">
+    <div class="callout-label">Second failure mode</div>
+    Treating real HTML as your test input too early. Start with HTML you write yourself — 10 lines, no external CSS, no JavaScript. Real-world HTML is malformed in ways that will break your engine before you understand your own code.
+  </div>
+
+  <div class="callout callout-danger">
+    <div class="callout-label">Third failure mode</div>
+    Skipping tests. A layout regression 3 phases in will waste more time than writing tests now. Write one test per function, especially for the parser and cascade logic. Layout bugs cascade (no pun intended) through every downstream component.
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-label">How to stay consistent</div>
+    Set a fixed rule: one module per week, in phase order. No phase skipping. Every Friday: demo the current phase output to someone (even yourself via a video recording). This forces you to have something runnable at all times.
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-label">The right mindset</div>
+    You are not building a browser. You are reverse-engineering one to understand it. Every time you get something wrong, you're learning a real browser constraint. The bugs <em>are</em> the learning. Embrace them.
+  </div>
+
+  <h3>Estimated timeline (part-time, 10 hrs/week)</h3>
+  <table class="tech-table">
+    <tr><th>Phase</th><th>Time estimate</th><th>Done when...</th></tr>
+    <tr><td>Phase 1</td><td>1 week</td><td>Dumps text content of any URL to stdout</td></tr>
+    <tr><td>Phase 2</td><td>2 weeks</td><td>Prints indented DOM tree matching DevTools</td></tr>
+    <tr><td>Phase 3</td><td>2 weeks</td><td>Prints correct computed styles per node</td></tr>
+    <tr><td>Phase 4</td><td>3 weeks</td><td>ASCII canvas shows correct box positions</td></tr>
+    <tr><td>Phase 5</td><td>2 weeks</td><td>Window opens, renders colored boxes + text</td></tr>
+    <tr><td>Phase 6</td><td>3 weeks</td><td>Button click changes text color via JS</td></tr>
+  </table>
+
+  <div class="toolbar">
+    <span class="toolbar-label">Start building:</span>
+    <button class="ask-btn" onclick="sendPrompt('Write a complete Phase 1 mini browser engine in Python that fetches a URL and dumps its text content')">Generate Phase 1 starter code ↗</button>
+    <button class="ask-btn" onclick="sendPrompt('Write an HTML tokenizer in Python with all the correct states for a browser engine')">Generate tokenizer ↗</button>
+  </div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = ['problem','arch','roadmap','stack','structure','algos','code','stretch','learning','advice'].indexOf(id);
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  window.scrollTo && window.scrollTo(0,0);
+}
+function toggle(head) {
+  const body = head.nextElementSibling;
+  const chev = head.querySelector('.acc-chevron');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+</script>
+</body>
+</html>
