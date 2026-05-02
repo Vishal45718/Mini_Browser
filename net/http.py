@@ -8,7 +8,7 @@ and receives at the wire level.
 import socket
 from dataclasses import dataclass
 from typing import Optional
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 
 @dataclass
@@ -24,13 +24,17 @@ class HTTPError(Exception):
     pass
 
 
-def fetch(url: str, timeout: float = 10.0) -> HTTPResponse:
+def fetch(url: str, timeout: float = 10.0, max_redirects: int = 5) -> HTTPResponse:
     """
     Fetch a URL over a raw TCP socket using HTTP/1.0.
+    Follows redirects up to max_redirects times.
 
     Returns an HTTPResponse with the decoded body.
     Raises HTTPError on network or protocol failures.
     """
+    if max_redirects < 0:
+        raise HTTPError("Too many redirects")
+
     parsed = urlparse(url)
 
     scheme = parsed.scheme.lower()
@@ -85,7 +89,17 @@ def fetch(url: str, timeout: float = 10.0) -> HTTPResponse:
 
     raw_response = b"".join(chunks)
 
-    return _parse_response(raw_response, url)
+    response = _parse_response(raw_response, url)
+
+    # Handle redirects (301, 302, 303, 307, 308)
+    if response.status_code in (301, 302, 303, 307, 308):
+        location = response.headers.get("location")
+        if location:
+            # Resolve relative redirect URLs against the current URL
+            next_url = urljoin(url, location)
+            return fetch(next_url, timeout, max_redirects - 1)
+
+    return response
 
 
 def _parse_response(raw: bytes, url: str) -> HTTPResponse:

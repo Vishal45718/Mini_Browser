@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-main.py — ToyBrowser Phase 1 CLI
+main.py — ToyBrowser CLI
 
 Usage:
     python main.py <url>
     python main.py <url> --tokens        # show raw token stream
+    python main.py <url> --dom           # show printed DOM tree
     python main.py <url> --raw           # show raw HTML source
     python main.py --demo                # run without network (built-in HTML)
 
 Examples:
     python main.py http://example.com
     python main.py http://info.cern.ch
-    python main.py http://example.com --tokens
+    python main.py http://example.com --dom
     python main.py --demo
 """
 
@@ -20,6 +21,7 @@ import textwrap
 
 from net.http import fetch, HTTPError
 from parser.html_tokenizer import HTMLTokenizer, TokenType
+from parser.html_tree_builder import build_tree
 from parser.text_extractor import extract_text
 
 
@@ -151,6 +153,13 @@ def display_raw(html: str):
         print(f"  {DIM}{i:>4}{RESET}  {line}")
 
 
+def display_dom(html: str):
+    """Debug mode: show the DOM tree."""
+    header("DOM Tree (Phase 2)")
+    dom = build_tree(html)
+    dom.dump()
+
+
 # ---------------------------------------------------------------------------
 # HTTP response display
 # ---------------------------------------------------------------------------
@@ -170,10 +179,12 @@ def main():
 
     # --demo flag: skip network, use built-in HTML
     if "--demo" in args:
-        mode = "tokens" if "--tokens" in args else "raw" if "--raw" in args else "text"
+        mode = "dom" if "--dom" in args else "tokens" if "--tokens" in args else "raw" if "--raw" in args else "text"
         print(f"\n{CYAN}Running in demo mode (no network required){RESET}\n")
         if mode == "tokens":
             display_tokens(DEMO_HTML)
+        elif mode == "dom":
+            display_dom(DEMO_HTML)
         elif mode == "raw":
             display_raw(DEMO_HTML)
         else:
@@ -186,7 +197,7 @@ def main():
         sys.exit(1)
 
     url = args[0]
-    mode = "tokens" if "--tokens" in args else "raw" if "--raw" in args else "text"
+    mode = "dom" if "--dom" in args else "tokens" if "--tokens" in args else "raw" if "--raw" in args else "text"
 
     # Add http:// if missing
     if not url.startswith("http://") and not url.startswith("https://"):
@@ -205,6 +216,8 @@ def main():
 
     if mode == "tokens":
         display_tokens(response.body)
+    elif mode == "dom":
+        display_dom(response.body)
     elif mode == "raw":
         display_raw(response.body)
     else:

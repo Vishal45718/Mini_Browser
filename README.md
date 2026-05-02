@@ -20,7 +20,7 @@ python main.py --demo
 
 # Fetch a real URL
 python main.py http://example.com
-python main.py http://info.cern.ch
+python main.py https://www.google.com
 
 # Debug: show raw token stream
 python main.py http://example.com --tokens
