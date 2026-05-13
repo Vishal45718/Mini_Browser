@@ -20,6 +20,7 @@ import sys
 import textwrap
 
 from net.http import fetch, HTTPError
+from parser.dom import dump_tree
 from parser.html_tokenizer import HTMLTokenizer, TokenType
 from parser.html_tree_builder import build_tree
 from parser.text_extractor import extract_text
@@ -157,7 +158,7 @@ def display_dom(html: str):
     """Debug mode: show the DOM tree."""
     header("DOM Tree (Phase 2)")
     dom = build_tree(html)
-    dom.dump()
+    dump_tree(dom)
 
 
 # ---------------------------------------------------------------------------

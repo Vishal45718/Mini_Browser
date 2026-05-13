@@ -6,7 +6,9 @@ Or:        python -m unittest tests/test_phase1.py -v
 """
 
 import unittest
+from parser.dom import DocumentNode, ElementNode, TextNode
 from parser.html_tokenizer import HTMLTokenizer, TokenType, Token
+from parser.html_tree_builder import build_tree
 from parser.text_extractor import extract_text
 
 
@@ -116,6 +118,58 @@ class TestTokenizer(unittest.TestCase):
         texts = [t.text for t in toks if t.type == TokenType.TEXT]
         combined = "".join(texts)
         self.assertIn("<", combined)
+
+
+# ===========================================================================
+# DOM / tree builder (Phase 2)
+# ===========================================================================
+
+class TestDOMTreeBuilder(unittest.TestCase):
+
+    def test_document_root(self):
+        root = build_tree("<p>hi</p>")
+        self.assertIsInstance(root, DocumentNode)
+        self.assertEqual(len(root.children), 1)
+
+    def test_nested_elements(self):
+        root = build_tree("<div><span>a</span></div>")
+        div = root.children[0]
+        self.assertIsInstance(div, ElementNode)
+        self.assertEqual(div.tag_name, "div")
+        self.assertEqual(len(div.children), 1)
+        span = div.children[0]
+        self.assertEqual(span.tag_name, "span")
+        self.assertIsInstance(span.children[0], TextNode)
+        self.assertEqual(span.children[0].content, "a")
+
+    def test_void_not_pushed(self):
+        root = build_tree("<p>x<br>y</p>")
+        p = root.children[0]
+        names = [c.tag_name for c in p.children if isinstance(c, ElementNode)]
+        self.assertEqual(names, ["br"])
+        texts = [c.content for c in p.children if isinstance(c, TextNode)]
+        self.assertEqual(texts, ["x", "y"])
+
+    def test_mismatched_end_closes_inner(self):
+        root = build_tree("<div><span></div>after</span>")
+        div = next(c for c in root.children if isinstance(c, ElementNode) and c.tag_name == "div")
+        self.assertEqual(div.tag_name, "div")
+        # `</div>` while span is open pops the stack to #document; remaining text attaches there.
+        def all_text(n):
+            parts = []
+            if isinstance(n, TextNode):
+                parts.append(n.content)
+            for c in n.children:
+                parts.extend(all_text(c))
+            return parts
+        self.assertIn("after", "".join(all_text(root)))
+
+    def test_parent_pointers(self):
+        root = build_tree("<a><b></b></a>")
+        a = root.children[0]
+        b = a.children[0]
+        self.assertIs(b.parent, a)
+        self.assertIs(a.parent, root)
 
 
 # ===========================================================================
